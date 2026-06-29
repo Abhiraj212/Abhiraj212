@@ -129,5 +129,4 @@ void loop() {
 
   // Handle Sinric Pro
   SinricPro.handle();
-
 }
