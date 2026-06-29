@@ -1,8 +1,8 @@
 name: Build ESP8266
 
 on:
-  push:
   workflow_dispatch:
+  push:
 
 jobs:
   build:
@@ -13,17 +13,32 @@ jobs:
 
       - uses: arduino/setup-arduino-cli@v2
 
-      - run: |
-          arduino-cli core update-index
-          arduino-cli core install esp8266:esp8266
-          arduino-cli lib install "SinricPro"
+      - name: Configure Arduino CLI
+        run: |
+          mkdir -p ~/.arduino15
+          cat <<EOF > ~/.arduino15/arduino-cli.yaml
+          board_manager:
+            additional_urls:
+              - https://arduino.esp8266.com/stable/package_esp8266com_index.json
+          EOF
 
-      - run: |
+      - name: Update Index
+        run: arduino-cli core update-index
+
+      - name: Install ESP8266
+        run: arduino-cli core install esp8266:esp8266
+
+      - name: Install Library
+        run: arduino-cli lib install "SinricPro"
+
+      - name: Compile
+        run: |
           arduino-cli compile \
-            --fqbn esp8266:esp8266:nodemcuv2 \
-            .
+          --fqbn esp8266:esp8266:nodemcuv2 \
+          .
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload BIN
+        uses: actions/upload-artifact@v4
         with:
           name: firmware
           path: build/**
